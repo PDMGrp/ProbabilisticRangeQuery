@@ -60,7 +60,7 @@ def main(args):
     ### Since this is an example, we'll clean up after ourselves.
     db = []
     for doc in cursor:
-        db.append([doc['Date'],doc['Time'],doc['Moteid'],doc['Temperature'],doc['Humidity']])
+        db.append([doc['dateTime'],doc['sensorId'],doc['temperature'],doc['humidity']])
     
     ### Only close the connection when your app is terminating
 

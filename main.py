@@ -1,5 +1,6 @@
 #start_date = 000000000
 #start_time = 000000000
+import MongoDB
 
 while True:
   Key = input("Enter Y to check the sensor situations, N to stop checking: ")
@@ -10,13 +11,7 @@ while True:
     """
     Send a query to the MongoDb to get a Reading_List of readings during a certain given interval time
     """
-    Reading_List = [
-                    [02.28,"00:59:16.02785",1,19.9884,37.0933],   
-                    [02.28,"01:03:16.33393",1,19.3024,38.4629],   
-                    [02.28,"01:06:16.013453",1,19.1652,38.8039],   
-                    [02.28,"01:06:46.778088",1,19.175,38.8379],   
-                    [02.28,"01:08:45.992524",1,19.1456,38.9401]
-                   ]
+    Reading_List = MongoDB.main()
     print("Length of Reading_List:", len(Reading_List))
 
     min_temp = float(input("Please enter your minimum temperature: "))

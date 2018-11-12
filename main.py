@@ -27,7 +27,7 @@ while True:
       i=0
       while i < len(Reading_List):
         sensor_name = "sensor"+str(ctr)
-        if ctr==Reading_List[i][2]:   # to check if the sensor id is the same ctr's value
+        if ctr==Reading_List[i][1]:   # to check if the sensor id is the same ctr's value
             Check_List.append(Reading_List[i])
         i+=1
 
@@ -37,7 +37,7 @@ while True:
     No_ctr = 0      #to count number of readings fall out of the user-given range query
     i=0
     while i<len(Check_List):
-        if(Check_List[i][3]>=min_temp and Check_List[i][3]<=max_temp) and (Check_List[i][4]>=min_humid and Check_List[i][4]<=max_humid):
+        if(Check_List[i][2]>=min_temp and Check_List[i][2]<=max_temp) and (Check_List[i][3]>=min_humid and Check_List[i][3]<=max_humid):
             Yes_ctr+=1
         else:
             No_ctr+=1

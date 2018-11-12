@@ -58,11 +58,14 @@ def main(args):
         print((doc['temperature']))
 
     ### Since this is an example, we'll clean up after ourselves.
-
-
+    db = []
+    for doc in cursor:
+        db.append([doc['Date'],doc['Time'],doc['Moteid'],doc['Temperature'],doc['Humidity']])
+    
     ### Only close the connection when your app is terminating
 
     client.close()
+    return db
 
 
 if __name__ == '__main__':

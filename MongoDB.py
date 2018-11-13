@@ -28,10 +28,10 @@ uri = 'mongodb://pdmGroup4:pdmGroup4@ds129762.mlab.com:29762/pdm_sensor_data'
 # main
 ###############################################################################
 
-def main(args):
+def main():
     client = pymongo.MongoClient(uri)
 
-    db = client.get_default_database()
+    db = client.get_database()
 
     # First we'll add a few songs. Nothing is required to create the songs
     # collection; it is created automatically when we insert.
@@ -44,8 +44,9 @@ def main(args):
     # Then we need to give Boyz II Men credit for their contribution to
     # the hit "One Sweet Day".
     d = datetime(2004, 3, 3, 3)
+    d2 = datetime(2004, 3, 5, 3)
 
-    query = {'temperature': 38.8039,'dateTime':{'$gt':d}}
+    query = {'temperature': 38.8039,'dateTime':{'$gt':d}, 'dateTime': {'$lt': d2}}
 
 
     # Finally we run a query which returns all the hits that spent 10 or
@@ -53,9 +54,9 @@ def main(args):
     print(d)
     cursor = pdm_dataset.find(query)
 
-    for doc in cursor:
-        print((doc['dateTime']))
-        print((doc['temperature']))
+    #for doc in cursor:
+    #    print((doc['dateTime']))
+    #    print((doc['temperature']))
 
     ### Since this is an example, we'll clean up after ourselves.
     db = []
@@ -69,4 +70,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()

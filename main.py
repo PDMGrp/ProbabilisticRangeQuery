@@ -56,7 +56,7 @@ while True:
       Check_List.clear()    # or Check_List[:]=[] to empify the list contents after every iteration
       ctr+=1
       
-    #Key = input("\nEnter Y to check the sensor situations, N to stop checking: ")
+    Key = input("\nEnter Y to check the sensor situations, N to stop checking: ")
         
     
 

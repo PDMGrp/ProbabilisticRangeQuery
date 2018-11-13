@@ -31,32 +31,32 @@ while True:
             Check_List.append(Reading_List[i])
         i+=1
 
-    print("Length of Check_List:", len(Check_List))
-    
-    Yes_ctr = 0     #to count number of readings fall in the user-given range query
-    No_ctr = 0      #to count number of readings fall out of the user-given range query
-    i=0
-    while i<len(Check_List):
-        if(Check_List[i][2]>=min_temp and Check_List[i][2]<=max_temp) and (Check_List[i][3]>=min_humid and Check_List[i][3]<=max_humid):
-            Yes_ctr+=1
-        else:
-            No_ctr+=1
-        i+=1
+      print("Length of Check_List:", len(Check_List))
+      
+      Yes_ctr = 0     #to count number of readings fall in the user-given range query
+      No_ctr = 0      #to count number of readings fall out of the user-given range query
+      i=0
+      while i<len(Check_List):
+          if(Check_List[i][2]>=min_temp and Check_List[i][2]<=max_temp) and (Check_List[i][3]>=min_humid and Check_List[i][3]<=max_humid):
+              Yes_ctr+=1
+          else:
+              No_ctr+=1
+          i+=1
 
-    if No_ctr == len(Check_List):
-        probability = 100
-    else:
-        probability = No_ctr/len(Check_List)
+      if No_ctr == len(Check_List):
+          probability = 100
+      else:
+          probability = No_ctr/len(Check_List)
 
-    if probability >= Threshold:
-        print("Warning: %s is in danger with confidence %f!" % (sensor_name,probability))
-    else:
-        print("No action is required: %s" % sensor_name)
-    
-    Check_List.clear()    # or Check_List[:]=[] to empify the list contents after every iteration
-    ctr+=1
-    
-    Key = input("\nEnter Y to check the sensor situations, N to stop checking: ")
+      if probability >= Threshold:
+          print("Warning: %s is in danger with confidence %f!" % (sensor_name,probability))
+      else:
+          print("No action is required: %s" % sensor_name)
+      
+      Check_List.clear()    # or Check_List[:]=[] to empify the list contents after every iteration
+      ctr+=1
+      
+    #Key = input("\nEnter Y to check the sensor situations, N to stop checking: ")
         
     
 

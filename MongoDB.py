@@ -40,18 +40,21 @@ def main():
     pdm_dataset = db['datasetpdm']
     # Note that the insert method can take either an array or a single dict.
 
-
+    start_time = input("Please enter your start time of query (YYYY-M-D-H-M): ")
+    end_time = input("Please enter your end time of query (YYYY-M-D-H-M): ")
+    
+    stime_list = start_time.split('-')
+    etime_list = end_time.split('-')
     # Then we need to give Boyz II Men credit for their contribution to
     # the hit "One Sweet Day".
-    d = datetime(2004, 3, 3, 3)
-    d2 = datetime(2004, 3, 5, 3)
+    d = datetime(int(stime_list[0]), int(stime_list[1]), int(stime_list[2]), int(stime_list[3]),int(stime_list[4]))
+    d2 = datetime(int(etime_list[0]), int(etime_list[1]), int(etime_list[2]), int(etime_list[3]),int(etime_list[4]))
 
-    query = {'temperature': 38.8039,'dateTime':{'$gt':d}, 'dateTime': {'$lt': d2}}
-
+    print(d, d2)
+    query = {"$and":[{'temperature': 38.8039},{'dateTime':{'$gt':d}},{'dateTime':{'$lt':d2}}]}
 
     # Finally we run a query which returns all the hits that spent 10 or
     # more weeks at number 1.
-    print(d)
     cursor = pdm_dataset.find(query)
 
     #for doc in cursor:
@@ -61,6 +64,7 @@ def main():
     ### Since this is an example, we'll clean up after ourselves.
     db = []
     for doc in cursor:
+        # print((doc['dateTime']))
         db.append([doc['dateTime'],doc['sensorId'],doc['temperature'],doc['humidity']])
     
     ### Only close the connection when your app is terminating

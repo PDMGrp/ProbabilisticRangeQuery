@@ -51,7 +51,7 @@ def main():
     d2 = datetime(int(etime_list[0]), int(etime_list[1]), int(etime_list[2]), int(etime_list[3]),int(etime_list[4]))
 
     print(d, d2)
-    query = {"$and":[{'temperature': 38.8039},{'dateTime':{'$gt':d}},{'dateTime':{'$lt':d2}}]}
+    query = {"$and":[{'dateTime':{'$gt':d}},{'dateTime':{'$lt':d2}}]}
 
     # Finally we run a query which returns all the hits that spent 10 or
     # more weeks at number 1.
@@ -65,7 +65,7 @@ def main():
     db = []
     for doc in cursor:
         # print((doc['dateTime']))
-        db.append(doc['dateTime'],doc['sensorId'],doc['temperature'],doc['humidity'])
+        db.append([doc['dateTime'],doc['sensorId'],doc['temperature'],doc['humidity']])
         #db.append(doc['dateTime','sensorId','temperature','humidity'])
     
     print(db)

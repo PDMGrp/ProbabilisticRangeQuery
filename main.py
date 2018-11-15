@@ -20,7 +20,7 @@ while True:
     max_humid = float(input("Please enter your maximum humidity: "))
 
     ctr=1
-    Threshold = 0.5
+    Threshold = 0.95
     Check_List = []
     Num_Of_Sensors = 58
     while ctr <= Num_Of_Sensors:

@@ -65,8 +65,10 @@ def main():
     db = []
     for doc in cursor:
         # print((doc['dateTime']))
-        db.append([doc['dateTime'],doc['sensorId'],doc['temperature'],doc['humidity']])
+        db.append(doc['dateTime'],doc['sensorId'],doc['temperature'],doc['humidity'])
+        #db.append(doc['dateTime','sensorId','temperature','humidity'])
     
+    print(db)
     ### Only close the connection when your app is terminating
 
     client.close()

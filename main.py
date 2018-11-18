@@ -9,6 +9,7 @@ import random
 import time
 import datetime
 import math
+import functools
 
 Threshold=0.95
 print("Confidence Threshold: ",Threshold)
@@ -27,6 +28,37 @@ counter = 0
 coord = []
 circles = []
 minmax = []
+
+convex_hulls = []
+
+
+def convex_hull_graham(points):
+    '''
+    Returns points on convex hull in CCW order according to Graham's scan algorithm.
+    By Tom Switzer <thomas.switzer@gmail.com>.
+    '''
+    TURN_LEFT, TURN_RIGHT, TURN_NONE = (1, -1, 0)
+
+    def cmp(a, b):
+        return (a > b) - (a < b)
+
+    def turn(p, q, r):
+        return cmp((q[0] - p[0])*(r[1] - p[1]) - (r[0] - p[0])*(q[1] - p[1]), 0)
+
+    def _keep_left(hull, r):
+        while len(hull) > 1 and turn(hull[-2], hull[-1], r) != TURN_LEFT:
+            hull.pop()
+        if not len(hull) or hull[-1] != r:
+            hull.append(r)
+        return hull
+
+    points = sorted(points)
+    l = functools.reduce(_keep_left, points, [])
+    u = functools.reduce(_keep_left, reversed(points), [])
+    return l.extend(u[i] for i in range(1, len(u) - 1)) or l
+
+
+
 
 
 while True:
@@ -108,6 +140,7 @@ while True:
     nohr=1
 
     circle_list = []
+    convex_hull_list = []
 
     
     end_time = start_time + datetime.timedelta(hours = nohr)
@@ -121,8 +154,11 @@ while True:
       loop_time = start_time
       while nohr<=sw_range:
         i=0
+        points_list = []
+
         while i<len(Check_List):
           if Check_List[i][0]>=loop_time and Check_List[i][0]<=end_time:
+            points_list.append((Check_List[i][2], Check_List[i][3]))
             if(Check_List[i][2] < temp_min):
                 temp_min = Check_List[i][2]
             if(Check_List[i][2] > temp_max):
@@ -136,6 +172,7 @@ while True:
         p1=math.floor(abs(temp_max-temp_min)/2)
         p2=math.floor(abs(humid_max-humid_min)/2)
 
+        convex_hull_list.append(convex_hull_graham(points_list))
         #circle = plt.Circle((temp_min+p1,humid_min+p2), .5)
 
         circle_list.append((temp_min, humid_min, temp_max, humid_max))
@@ -147,6 +184,7 @@ while True:
 
 
     circles.append(circle_list)
+    convex_hulls.append(convex_hull_list)
 
     Check_List.clear()    
     ctr+=1
@@ -177,7 +215,17 @@ while True:
       for y in range (0,len(circles[i])):
         cir = plt.Rectangle((circles[i][y][0],circles[i][y][1]), circles[i][y][2] - circles[i][y][0], circles[i][y][3] - circles[i][y][1], alpha = 1, fc='none', linestyle='dashed')
         plt.gca().add_patch(cir)
-      
+    if(len(convex_hulls[i])>0):
+      for y in range(0, len(convex_hulls[i])):
+        if convex_hulls[i][y]:
+          x_coordiate = [obj[0] for obj in convex_hulls[i][y]]
+          y_coordinate = [obj[1] for obj in convex_hulls[i][y]]
+
+          plt.gca().add_artist(plt.scatter(x_coordiate, y_coordinate, label='skitscat', color='blue', s=1, marker="o"))
+
+          plt.gca().add_patch(plt.Polygon(convex_hulls[i][y], fill=0))
+
+
     i+=1
     #plt.axis('scaled')
 

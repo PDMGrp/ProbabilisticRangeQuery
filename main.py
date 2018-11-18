@@ -26,9 +26,11 @@ start_time = datetime.datetime(int(stime_list[0]), int(stime_list[1]), int(stime
 counter = 0
 coord = []
 circles = []
+minmax = []
+
 
 while True:
-  Reading_List = MongoDB.main(sw_range, start_time, counter)
+  Reading_List = MongoDB.main(sw_range, start_time, counter, minmax)
   print("Length of Reading_List:", len(Reading_List))
 
   ctr=1 
@@ -36,6 +38,9 @@ while True:
   Num_Of_Sensors = 58
 
   plt.axes()
+
+  print("Sensor ID\t(Min_temp, Min_humid)\t(Max_temp,Max_humid)\tProb(within_range)\tConfidence_to_be_in_danger\tStatus")
+  print("---------------------------------------------------------------------------------------------------------------------------------------------------")
   
   while ctr <= Num_Of_Sensors:
     i=0
@@ -81,17 +86,20 @@ while True:
       i+=1
 
     if No_ctr == len(Check_List):
-      probability = 100
+      probability = 1
     else:
       probability = No_ctr/len(Check_List)
 
     if len(Check_List) == 0:
-      print("No readings returned for the %s during the given range!" % sensor_name)
+      #print("No readings returned for the %s during the given range!" % sensor_name)
+      print("%s  \t(null, null)\t\t(null, null)\t\tN/A\t\t\tN/A\t\t\t\tNo Records found!" % sensor_name)
     elif probability >= Threshold:
-      print("Warning: the %s is in danger with confidence %f!" % (sensor_name,probability))
+      #print("Warning: the %s is in danger with confidence %f!" % (sensor_name,probability))
+      print("%s  \t(%f, %f)\t(%f, %f)\t%f\t\t%f\t\t\t** DANGER **" % (sensor_name, s_min_temp,s_min_hum,s_max_temp,s_max_hum,100-(probability*100), probability*100))
     else:
-      print("No action is required: %s %f" % (sensor_name, probability))
-      
+      print("%s  \t(%f, %f)\t(%f, %f)\t%f\t\t%f\t\t\tNOT IN DANGER." % (sensor_name, s_min_temp,s_min_hum,s_max_temp,s_max_hum,100-(probability*100), probability*100))
+      #print("No action is required: %s %f" % (sensor_name, probability))
+    
     coord.append([s_min_temp,s_min_hum,s_max_temp,s_max_hum])
 
 
@@ -114,23 +122,23 @@ while True:
       while nohr<=sw_range:
         i=0
         while i<len(Check_List):
-          if Check_List[i][0]>=start_time and Check_List[i][0]<=end_time:
-            if(Check_List[i][2] < s_min_temp):
+          if Check_List[i][0]>=loop_time and Check_List[i][0]<=end_time:
+            if(Check_List[i][2] < temp_min):
                 temp_min = Check_List[i][2]
-            if(Check_List[i][2] > s_max_temp):
+            if(Check_List[i][2] > temp_max):
                 temp_max = Check_List[i][2]
-            if(Check_List[i][3] < s_min_hum):
+            if(Check_List[i][3] < humid_min):
                 humid_min = Check_List[i][3]
-            if(Check_List[i][3] > s_max_hum):
+            if(Check_List[i][3] > humid_max):
                 humid_max = Check_List[i][3]
           i+=1
 
         p1=math.floor(abs(temp_max-temp_min)/2)
         p2=math.floor(abs(humid_max-humid_min)/2)
 
-        circle = plt.Circle((temp_min+p1,humid_min+p2), .5)
+        #circle = plt.Circle((temp_min+p1,humid_min+p2), .5)
 
-        circle_list.append(circle)
+        circle_list.append((temp_min, humid_min, temp_max, humid_max))
         #plt.gca().add_patch(circle)
 
         nohr+=1
@@ -155,20 +163,43 @@ while True:
 
   i=0
   while i<len(coord):
-    plt.close()
     plt.axes()
-    rectangle = plt.Rectangle((min_temp, min_humid), max_temp - min_temp, max_humid - min_humid, fc='y', linestyle='dashed')
+    rectangle = plt.Rectangle((min_temp, min_humid), max_temp - min_temp, max_humid - min_humid, fc='y')
     plt.gca().add_patch(rectangle)
-    for x in range(0,i+1):
-      MBR = plt.Rectangle((coord[x][0], coord[x][1]), coord[x][2] - coord[x][0], coord[x][3] - coord[x][1], fc=color[x])
-      plt.gca().add_patch(MBR)
-      for y in range (0,len(circles[x])):
-        plt.gca().add_patch(circles[x][y])
+    #for x in range(0, i+1):
+    MBR = plt.Rectangle((coord[i][0], coord[i][1]), coord[i][2] - coord[i][0], coord[i][3] - coord[i][1], fc=color[2], alpha=0.3)
+    plt.gca().add_patch(MBR)
+    if (coord[i][0] + coord[i][1] + coord[i][0] + coord[i][1]) > 0:
+      plt.text(0.5*(coord[i][0]+coord[i][2]), 0.5*(coord[i][1]+coord[i][3]), 'Sensor'+str(i+1), horizontalalignment='center', verticalalignment='center', fontsize=10, color='red')
+    #print(circles[i])
+    #print(coord[i])
+    if(len(circles[i])>0):
+      for y in range (0,len(circles[i])):
+        cir = plt.Rectangle((circles[i][y][0],circles[i][y][1]), circles[i][y][2] - circles[i][y][0], circles[i][y][3] - circles[i][y][1], alpha = 1, fc='none', linestyle='dashed')
+        plt.gca().add_patch(cir)
+      
     i+=1
+    #plt.axis('scaled')
 
-    plt.axis('scaled')
+
+    if minmax[2] > max_temp:
+      xmax = minmax[2] + 10
+    else:
+      xmax = max_temp + 10
+    if minmax[3] > max_humid:
+      ymax = minmax[3] + 10
+    else:
+      ymax = max_humid + 10
+    plt.xlim(minmax[0] - 5, xmax)
+    plt.ylim(0, ymax)
+    plt.savefig('sensor'+str(i)+'.jpg')
     plt.show()
-    time.sleep(2)
+    time.sleep(1)
+    plt.close()
+
+  #plt.axis('scaled')
+  #plt.show()
+  #time.sleep(2)  
 
     
 
@@ -177,7 +208,7 @@ while True:
 
   counter+= 1
   
-  Key = input("Enter Y to check the sensor situations, N to stop checking: ")
+  Key = input("Enter Y to check for the next window between the period %s - %s: ", (str(start_time+datetime.timedelta(hours=1)), str(start_time + datetime.timedelta(hours = 1+sw_range))))
   if Key=='N' or Key=='n':
     break
         

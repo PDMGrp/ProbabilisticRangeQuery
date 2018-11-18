@@ -28,7 +28,8 @@ uri = 'mongodb://pdmGroup4:pdmGroup4@ds129762.mlab.com:29762/pdm_sensor_data'
 # main
 ###############################################################################
 
-def main(sw_size, start_time, counter):
+
+def main(sw_size, start_time, counter, minmax):
     client = pymongo.MongoClient(uri)
 
     db = client.get_database()
@@ -101,6 +102,11 @@ def main(sw_size, start_time, counter):
     print("Maximum Temperature within the range: ",max_temp)
     print("Minimum Humidity within the range: ",min_humidity)
     print("Maximum Humidity within the range: ",max_humidity)
+
+    minmax.append(min_temp)
+    minmax.append(min_humidity)
+    minmax.append(max_temp)
+    minmax.append(max_humidity)
 
     client.close()
     return db

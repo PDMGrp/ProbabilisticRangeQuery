@@ -43,12 +43,12 @@ def main(sw_size, start_time, counter):
     
     #end_time = input("Please enter your end time of query (YYYY-M-D-H-M): ")
     
-    stime_list = start_time.split('-')
+    #stime_list = start_time.split('-')
     #etime_list = end_time.split('-')
     # Then we need to give Boyz II Men credit for their contribution to
     # the hit "One Sweet Day".
-    d = datetime.datetime(int(stime_list[0]), int(stime_list[1]), int(stime_list[2]), int(stime_list[3]))
-    d = d + datetime.timedelta(hours = counter)
+    #d = datetime.datetime(int(stime_list[0]), int(stime_list[1]), int(stime_list[2]), int(stime_list[3]))
+    d = start_time + datetime.timedelta(hours = counter)
 
     '''
     end_time = start_time + 

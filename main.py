@@ -11,16 +11,21 @@ import datetime
 import math
 import functools
 
-Threshold=0.95
+Threshold=0.90
 print("Confidence Threshold: ",Threshold)
 
-min_temp = float(input("Please enter your minimum temperature: "))
-min_humid = float(input("Please enter your minimum humidity: "))
-max_temp = float(input("Please enter your maximum temperature: "))
-max_humid = float(input("Please enter your maximum humidity: "))
 
-sw_range = int(input("Please enter the Sliding Window size: "))
-start_time = input("Please enter your start time of query (YYYY-M-D-H): ")
+temp = input("Please enter the range of temperature (Min, Max): ").split(",")
+min_temp = float(temp[0])
+max_temp = float(temp[1])
+humid = input("Please enter the range of humidity (Min, Max): ").split(",")
+min_humid = float(humid[0])
+max_humid = float(humid[1])
+
+sw_range = 12 
+#int(input("Please enter the Sliding Window size: "))
+print("Query Observation Period (Sliding Window Size): ", sw_range)
+start_time = input("Please enter the start time of query (YYYY-M-D-H): ")
 stime_list = start_time.split('-')
 start_time = datetime.datetime(int(stime_list[0]), int(stime_list[1]), int(stime_list[2]), int(stime_list[3]))
 
@@ -31,12 +36,13 @@ minmax = []
 
 convex_hulls = []
 total_points_list = []
+sensor_info = []
 
 
 def convex_hull_graham(points):
     '''
     Returns points on convex hull in CCW order according to Graham's scan algorithm.
-    By Tom Switzer <thomas.switzer@gmail.com>.
+
     '''
     TURN_LEFT, TURN_RIGHT, TURN_NONE = (1, -1, 0)
 
@@ -126,19 +132,22 @@ while True:
     if len(Check_List) == 0:
       #print("No readings returned for the %s during the given range!" % sensor_name)
       print("%s  \t(null, null)\t\t(null, null)\t\tN/A\t\t\tN/A\t\t\t\tNo Records found!" % sensor_name)
+      sensor_info.append(("N/A","N/A"))
     elif probability >= Threshold:
       #print("Warning: the %s is in danger with confidence %f!" % (sensor_name,probability))
       print("%s  \t(%f, %f)\t(%f, %f)\t%f\t\t%f\t\t\t** DANGER **" % (sensor_name, s_min_temp,s_min_hum,s_max_temp,s_max_hum,100-(probability*100), probability*100))
+      sensor_info.append(("DANGER",probability))
     else:
       print("%s  \t(%f, %f)\t(%f, %f)\t%f\t\t%f\t\t\tNOT IN DANGER." % (sensor_name, s_min_temp,s_min_hum,s_max_temp,s_max_hum,100-(probability*100), probability*100))
       #print("No action is required: %s %f" % (sensor_name, probability))
+      sensor_info.append(("NOT IN DANGER",probability))
     
     coord.append([s_min_temp,s_min_hum,s_max_temp,s_max_hum])
 
 
     #draw circle inside rectangle
     
-    nohr=1
+    nohr=2
 
     circle_list = []
     convex_hull_list = []
@@ -154,7 +163,8 @@ while True:
       humid_max = 0
 
       loop_time = start_time
-      while nohr<=sw_range:
+      temp = nohr
+      while temp<=sw_range:
         i=0
         points_list = []
 
@@ -181,7 +191,8 @@ while True:
         circle_list.append((temp_min, humid_min, temp_max, humid_max))
         #plt.gca().add_patch(circle)
 
-        nohr+=1
+        # nohr+=2
+        temp+=2
         loop_time = end_time
         end_time = loop_time + datetime.timedelta(hours = nohr)
 
@@ -208,22 +219,27 @@ while True:
   # color = ["#"+''.join([random.choice('0123456789ABCDEF89ABCDEF') for j in range(6)])
   #            for i in range(number_of_colors)]
 
+  colorlst=['blue','black','brown', 'cyan','pink','purple','gray','olive','silver','rosybrown','navy','tomato']
+
   i=0
   while i<len(coord):
     plt.axes()
-    rectangle = plt.Rectangle((min_temp, min_humid), max_temp - min_temp, max_humid - min_humid, fc='y')
+    rectangle = plt.Rectangle((min_temp, min_humid), max_temp - min_temp, max_humid - min_humid, fc='#118822')
     plt.gca().add_patch(rectangle)
+    plt.text(0.5*(min_temp+max_temp), 0.5*(min_humid+max_humid), "Query Region", horizontalalignment='center', verticalalignment='center', fontsize=15, color='white')
     #for x in range(0, i+1):
-    MBR = plt.Rectangle((coord[i][0], coord[i][1]), coord[i][2] - coord[i][0], coord[i][3] - coord[i][1], fc=color[2], alpha=0.3)
+    MBR = plt.Rectangle((coord[i][0], coord[i][1]), coord[i][2] - coord[i][0], coord[i][3] - coord[i][1], fc='yellow', alpha=0.5)
     plt.gca().add_patch(MBR)
     if (coord[i][0] + coord[i][1] + coord[i][0] + coord[i][1]) > 0:
-      plt.text(0.5*(coord[i][0]+coord[i][2]), 0.5*(coord[i][1]+coord[i][3]), 'Sensor'+str(i+1), horizontalalignment='center', verticalalignment='center', fontsize=10, color='red')
+      plt.text(0.5*(coord[i][0]+coord[i][2]), 0.5*(coord[i][1]+coord[i][3]), 'Sensor'+str(i+1), horizontalalignment='center', verticalalignment='center', fontsize=12, color='red')
     #print(circles[i])
     #print(coord[i])
+    '''
     if(len(circles[i])>0):
       for y in range (0,len(circles[i])):
         cir = plt.Rectangle((circles[i][y][0],circles[i][y][1]), circles[i][y][2] - circles[i][y][0], circles[i][y][3] - circles[i][y][1], alpha = 1, fc='none', linestyle='dashed')
         plt.gca().add_patch(cir)
+    '''
     if(len(convex_hulls[i])>0):
       for y in range(0, len(convex_hulls[i])):
         if convex_hulls[i][y]:
@@ -233,11 +249,11 @@ while True:
           x_co = [obj[0] for obj in total_points_list[i][y]]
           y_co = [obj[1] for obj in total_points_list[i][y]]
           # uncomment this line to plot all the points inside the hulls
-          # plt.gca().add_artist(plt.scatter(x_co, y_co, label='skitscat', color=color[y], s=1, marker="o"))
+          plt.gca().add_artist(plt.scatter(x_co, y_co, label='skitscat', color=colorlst[y], s=1, marker="o"))
 
-          plt.gca().add_artist(plt.scatter(x_coordiate, y_coordinate, label='skitscat', color=color[y], s=1, marker="o"))
+          plt.gca().add_artist(plt.scatter(x_coordiate, y_coordinate, label='skitscat', color=colorlst[y], s=3, marker="o"))
 
-          plt.gca().add_patch(plt.Polygon(convex_hulls[i][y], fill=0, linestyle='--', linewidth=0.5,alpha=0.3, color=color[y]))
+          plt.gca().add_patch(plt.Polygon(convex_hulls[i][y], fill=0, linestyle='--', linewidth=0.5,alpha=0.3, color=colorlst[y]))
 
 
     i+=1
@@ -252,9 +268,26 @@ while True:
       ymax = minmax[3] + 10
     else:
       ymax = max_humid + 10
-    plt.xlim(minmax[0] - 5, xmax)
+    if min_temp < minmax[0]:
+      minn = min_temp - 5
+    else:
+      minn = minmax[0] - 5
+    plt.xlim(minn, xmax)
     plt.ylim(0, ymax)
     plt.savefig('sensor'+str(i)+'.jpg')
+
+
+    plt.xlabel("Temperature")
+    plt.ylabel("Humidity")
+
+    #plt.legend(loc='upper right')
+    #anchored_text = AnchoredText("Sensor"+str(i)+":\nStatus: "+sensor_info[i][0]+"\nProbability to be in danger: "+str(sensor_info[i][1]), loc=3)
+    plt.annotate("Sensor"+str(i)+":\nStatus: "+sensor_info[i-1][0]+"\nProbability to be in danger: "+str(sensor_info[i-1][1]), xy=(0.5,0.9),xycoords='axes fraction', fontsize=12)
+
+    # wm = plt.get_current_fig_manager()
+    # wm.window.state('zoomed')
+
+
     plt.show()
     time.sleep(1)
     plt.close()

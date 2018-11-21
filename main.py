@@ -30,6 +30,7 @@ circles = []
 minmax = []
 
 convex_hulls = []
+total_points_list = []
 
 
 def convex_hull_graham(points):
@@ -141,6 +142,7 @@ while True:
 
     circle_list = []
     convex_hull_list = []
+    sensor_points_list = []
 
     
     end_time = start_time + datetime.timedelta(hours = nohr)
@@ -173,6 +175,7 @@ while True:
         p2=math.floor(abs(humid_max-humid_min)/2)
 
         convex_hull_list.append(convex_hull_graham(points_list))
+        sensor_points_list.append(points_list)
         #circle = plt.Circle((temp_min+p1,humid_min+p2), .5)
 
         circle_list.append((temp_min, humid_min, temp_max, humid_max))
@@ -185,6 +188,7 @@ while True:
 
     circles.append(circle_list)
     convex_hulls.append(convex_hull_list)
+    total_points_list.append(sensor_points_list)
 
     Check_List.clear()    
     ctr+=1
@@ -196,8 +200,13 @@ while True:
   #Color_List = list(colors._colors_full_map.values())
 
   number_of_colors = 100
-  color = ["#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)])
-             for i in range(number_of_colors)]
+  color = []
+  for i in range(number_of_colors):
+    randColor = "#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)])
+    if randColor not in color:
+      color.append(randColor)
+  # color = ["#"+''.join([random.choice('0123456789ABCDEF89ABCDEF') for j in range(6)])
+  #            for i in range(number_of_colors)]
 
   i=0
   while i<len(coord):
@@ -220,10 +229,15 @@ while True:
         if convex_hulls[i][y]:
           x_coordiate = [obj[0] for obj in convex_hulls[i][y]]
           y_coordinate = [obj[1] for obj in convex_hulls[i][y]]
+          # coordinates for scatter points
+          x_co = [obj[0] for obj in total_points_list[i][y]]
+          y_co = [obj[1] for obj in total_points_list[i][y]]
+          # uncomment this line to plot all the points inside the hulls
+          # plt.gca().add_artist(plt.scatter(x_co, y_co, label='skitscat', color=color[y], s=1, marker="o"))
 
-          plt.gca().add_artist(plt.scatter(x_coordiate, y_coordinate, label='skitscat', color='blue', s=1, marker="o"))
+          plt.gca().add_artist(plt.scatter(x_coordiate, y_coordinate, label='skitscat', color=color[y], s=1, marker="o"))
 
-          plt.gca().add_patch(plt.Polygon(convex_hulls[i][y], fill=0))
+          plt.gca().add_patch(plt.Polygon(convex_hulls[i][y], fill=0, linestyle='--', linewidth=0.5,alpha=0.3, color=color[y]))
 
 
     i+=1

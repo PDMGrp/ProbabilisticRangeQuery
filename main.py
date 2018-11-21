@@ -226,7 +226,7 @@ while True:
     plt.axes()
     rectangle = plt.Rectangle((min_temp, min_humid), max_temp - min_temp, max_humid - min_humid, fc='#118822')
     plt.gca().add_patch(rectangle)
-    plt.text(0.5*(min_temp+max_temp), 0.5*(min_humid+max_humid), "Query Region", horizontalalignment='center', verticalalignment='center', fontsize=15, color='white')
+    plt.text(0.5*(min_temp+max_temp), 0.5*(min_humid+max_humid), "SAFE REGION\n(Given by USER)", horizontalalignment='center', verticalalignment='center', fontsize=15, color='white')
     #for x in range(0, i+1):
     MBR = plt.Rectangle((coord[i][0], coord[i][1]), coord[i][2] - coord[i][0], coord[i][3] - coord[i][1], fc='yellow', alpha=0.5)
     plt.gca().add_patch(MBR)
